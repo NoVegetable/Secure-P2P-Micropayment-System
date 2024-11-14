@@ -1,6 +1,7 @@
+demo/
+
 # binary
-server
-client
+client*
 
 # shell script
 *.sh
