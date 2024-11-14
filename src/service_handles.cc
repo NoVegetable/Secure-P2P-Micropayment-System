@@ -109,6 +109,8 @@ vector<string> __split(const char *s, const char *delim) {
         p = strtok(0, delim);
     }
 
+    delete[] s_copy;
+
     return tokens;
 }
 
@@ -233,6 +235,7 @@ int __login_handle(int socket_fd, char *buf)
         pthread_attr_t attr;
         pthread_attr_init(&attr);
         pthread_create(&tid, &attr, __keep_listening, &local_fd);
+        pthread_detach(tid); // detach from the main thread to avoid memory leaks when main thread terminates
 
         printf("Keep listening on port %d\n", local_port);
         
