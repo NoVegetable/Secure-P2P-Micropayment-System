@@ -1,6 +1,10 @@
+*
+!*.*
+!*/
+# Above will ignore all file without extensions
+
 demo/
 .vscode/
-*.*
 
 # Prerequisites
 *.d
