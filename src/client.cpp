@@ -68,7 +68,6 @@ int main(int argc, char *argv[]) {
     printf("Connect to server at %s:%d\n", server_ip, server_port);
 
     int opt = -1;
-    int loop_count = 0;
     do {
         printf("\n\033[1mPress ENTER to continue...\033[0m");
         fflush(stdout);
