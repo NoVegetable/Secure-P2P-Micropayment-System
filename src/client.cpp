@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     server_addr.sin_addr.s_addr = inet_addr(server_ip);
 
     if (connect(server_fd, (struct sockaddr *) &server_addr, sizeof(server_addr)) == -1) {
-        fprintf(stderr, "[Error] Failed to connect to the server.");
+        fprintf(stderr, "[Error] Failed to connect to the server.\n");
         return EXIT_FAILURE;
     }
 
