@@ -23,7 +23,7 @@ unsigned int num_online;
 vector<Peer> peer_list;
 
 /* XTerm control sequences reference: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html */
-void alternate_screen()
+void to_alternate_screen()
 {
     static int call_count = 0;
     if (call_count == 0) {
@@ -34,7 +34,7 @@ void alternate_screen()
     }
 }
 
-void restore_screen()
+void restore_normal_screen()
 {
     /* CSI ?47l: Use Normal Screen Buffer, xterm. */
     /* CSI ?1048l: Restore cursor as in DECRC, xterm. */
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
             scanf("%c", &c);
         } while (c != '\n');
         
-        alternate_screen(); // called only once
+        to_alternate_screen(); // called only once
 
         printf("\033[H\033[J");
         printf("Please select a service:\n\n"
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
         if (retcode == -1) {
             fprintf(stderr, "[Error] Failed to handle the required service.\n");
             close(server_fd);
-            restore_screen();
+            restore_normal_screen();
             return EXIT_FAILURE;
         }
         
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
     } while (opt != SERVICE_EXIT);
 
-    restore_screen();
+    restore_normal_screen();
 
     return 0;
 }
