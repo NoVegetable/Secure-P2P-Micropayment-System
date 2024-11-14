@@ -22,8 +22,27 @@ unsigned int account_balance;
 unsigned int num_online;
 vector<Peer> peer_list;
 
-int main(int argc, char *argv[]) {
+/* XTerm control sequences reference: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html */
+void alternate_screen()
+{
+    static int call_count = 0;
+    if (call_count == 0) {
+        /* CSI ?1049h: Save cursor as in DECSC, xterm. After saving the cursor, switch to the Alternate Screen Buffer, clearing it first. */
+        printf("\033[?1049h");
+        fflush(stdout);
+        ++call_count;
+    }
+}
 
+void restore_screen()
+{
+    /* CSI ?47l: Use Normal Screen Buffer, xterm. */
+    /* CSI ?1048l: Restore cursor as in DECRC, xterm. */
+    printf("\033[?47l\033[?1048l");
+    fflush(stdout);
+}
+
+int main(int argc, char *argv[]) {
     if(argc < 3) {
         fprintf(stderr, "[Error] Either server IP or PORT is not given.\n");
         return EXIT_FAILURE;
@@ -49,6 +68,7 @@ int main(int argc, char *argv[]) {
     printf("Connect to server at %s:%d\n", server_ip, server_port);
 
     int opt = -1;
+    int loop_count = 0;
     do {
         printf("\n\033[1mPress ENTER to continue...\033[0m");
         fflush(stdout);
@@ -56,6 +76,8 @@ int main(int argc, char *argv[]) {
         do {
             scanf("%c", &c);
         } while (c != '\n');
+        
+        alternate_screen(); // called only once
 
         printf("\033[H\033[J");
         printf("Please select a service:\n\n"
@@ -77,6 +99,7 @@ int main(int argc, char *argv[]) {
         if (retcode == -1) {
             fprintf(stderr, "[Error] Failed to handle the required service.\n");
             close(server_fd);
+            restore_screen();
             return EXIT_FAILURE;
         }
         
@@ -85,6 +108,8 @@ int main(int argc, char *argv[]) {
         }
 
     } while (opt != SERVICE_EXIT);
+
+    restore_screen();
 
     return 0;
 }
