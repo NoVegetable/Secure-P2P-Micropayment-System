@@ -201,7 +201,11 @@ int __login_handle(int socket_fd, char *buf)
     scanf("%hu", &local_port);
     getchar();
 
-    int local_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int local_fd;
+    if ((local_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        fprintf(stderr, "[Error] Failed to create socket.\n");
+        return INTERNAL_FAILURE;
+    }
     struct sockaddr_in local_addr;
     local_addr.sin_family = AF_INET;
     local_addr.sin_addr.s_addr = INADDR_ANY;
@@ -288,7 +292,11 @@ int __transaction_handle(int socket_fd, char *buf)
     parse_list_msg(list_msg);
     const Peer *p = __get_peer_by_name(payeename);
     if (p) {
-        int peer_fd = socket(AF_INET, SOCK_STREAM, 0);
+        int peer_fd;
+        if ((peer_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+            fprintf(stderr, "[Error] Failed to create socket.\n");
+            return INTERNAL_FAILURE;
+        }
         struct sockaddr_in peer_addr;
         peer_addr.sin_family = AF_INET;
         peer_addr.sin_addr.s_addr = INADDR_ANY; //inet_addr(p->ip);

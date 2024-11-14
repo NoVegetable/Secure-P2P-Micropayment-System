@@ -32,7 +32,10 @@ int main(int argc, char *argv[]) {
     server_ip = argv[1];
     server_port = (unsigned short) atoi(argv[2]);
 
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        fprintf(stderr, "[Error] Failed to create socket.\n");
+        return INTERNAL_FAILURE;
+    }
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(server_port);

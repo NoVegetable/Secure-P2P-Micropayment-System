@@ -1,6 +1,6 @@
 # binary
-./server
-./client
+server
+client
 
 # shell script
 *.sh
