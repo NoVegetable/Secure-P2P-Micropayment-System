@@ -299,7 +299,7 @@ int __transaction_handle(int socket_fd, char *buf)
         }
         struct sockaddr_in peer_addr;
         peer_addr.sin_family = AF_INET;
-        peer_addr.sin_addr.s_addr = INADDR_ANY; //inet_addr(p->ip);
+        peer_addr.sin_addr.s_addr = inet_addr(p->ip);
         peer_addr.sin_port = htons(p->port);
         
         if (connect(peer_fd, (const struct sockaddr *) &peer_addr, sizeof(peer_addr)) == -1) {
