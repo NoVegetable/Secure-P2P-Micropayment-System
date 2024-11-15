@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
     } while (opt != SERVICE_EXIT);
 
     restore_normal_screen();
+    close(server_fd);
 
     return 0;
 }
