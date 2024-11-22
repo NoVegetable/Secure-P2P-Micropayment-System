@@ -8,7 +8,7 @@
 #include <netinet/in.h>
 #include <string>
 #include <vector>
-#include "core.h"
+#include "client.h"
 
 using std::string;
 using std::vector;
