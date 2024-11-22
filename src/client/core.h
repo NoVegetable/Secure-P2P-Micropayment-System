@@ -1,5 +1,5 @@
-#ifndef SERVICE_HANDLES_H
-#define SERVICE_HANDLES_H
+#ifndef __CORE_H
+#define __CORE_H
 
 #ifdef __cplusplus
 extern "C" {
