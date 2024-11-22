@@ -21,41 +21,6 @@ extern string server_public_key;
 extern unsigned int num_online;
 extern int server_fd;
 
-int service_handles(int opt, int socket_fd, char *buf)
-{
-    switch (opt) {
-        case SERVICE_EXIT:
-        {
-            return __exit_handle(socket_fd, buf);
-        }
-        case SERVICE_REGISTER:
-        {
-            return __register_handle(socket_fd, buf);
-            break;
-        }
-        case SERVICE_LOGIN:
-        {
-            return __login_handle(socket_fd, buf);
-            break;
-        }
-        case SERVICE_LIST:
-        {
-            return __list_handle(socket_fd, buf);
-            break;
-        }
-        case SERVICE_TRANSACTION:
-        {
-            return __transaction_handle(socket_fd, buf);
-            break;
-        }
-        default:
-        {
-            fprintf(stderr, "Command not found.\n");
-            return INTERNAL_FAILURE;
-        }
-    }
-}
-
 inline int __get_server_response(int socket_fd, char *send_msg, char *recv_buf)
 {
     if (send(socket_fd, send_msg, strlen(send_msg), 0) == -1) {
@@ -322,4 +287,39 @@ int __transaction_handle(int socket_fd, char *buf)
     }
 
     return 0;
+}
+
+int service_handles(int opt, int socket_fd, char *buf)
+{
+    switch (opt) {
+        case SERVICE_EXIT:
+        {
+            return __exit_handle(socket_fd, buf);
+        }
+        case SERVICE_REGISTER:
+        {
+            return __register_handle(socket_fd, buf);
+            break;
+        }
+        case SERVICE_LOGIN:
+        {
+            return __login_handle(socket_fd, buf);
+            break;
+        }
+        case SERVICE_LIST:
+        {
+            return __list_handle(socket_fd, buf);
+            break;
+        }
+        case SERVICE_TRANSACTION:
+        {
+            return __transaction_handle(socket_fd, buf);
+            break;
+        }
+        default:
+        {
+            fprintf(stderr, "Command not found.\n");
+            return INTERNAL_FAILURE;
+        }
+    }
 }

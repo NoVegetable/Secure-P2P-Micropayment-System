@@ -23,11 +23,6 @@ struct Peer {
 };
 
 int service_handles(int opt, int socket_fd, char *buf);
-int __exit_handle(int socket_fd, char *buf);
-int __register_handle(int socket_fd, char *buf);
-int __login_handle(int socket_fd, char *buf);
-int __list_handle(int socket_fd, char *buf);
-int __transaction_handle(int socket_fd, char *buf);
 
 #ifdef __cplusplus
 }
