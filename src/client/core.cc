@@ -116,23 +116,21 @@ vector<string> __split(const char *s, const char *delim) {
 
 int __listening(int socket_fd)
 {
+    struct sockaddr_in local_addr;
+    int addrlen = sizeof(local_addr);
+    getsockname(socket_fd, (struct sockaddr *) &local_addr, (socklen_t *) &addrlen);
+
     struct sockaddr_in client_addr;
-    int addrlen = sizeof(client_addr);
+    int client_addrlen = sizeof(client_addr);
     int client_fd;
-    if((client_fd = accept(socket_fd, (struct sockaddr *) &client_addr, (socklen_t *) &addrlen)) == -1) {
-        struct sockaddr_in local_addr;
-        int addrlen = sizeof(local_addr);
-        getsockname(socket_fd, (struct sockaddr *) &local_addr, (socklen_t *) &addrlen);
-        printf("[Warning] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
+    if((client_fd = accept(socket_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addrlen)) == -1) {
+        fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
     }
 
     char recv_buf[BUF_MAXLEN] = { 0 };
     if (recv(client_fd, recv_buf, BUF_MAXLEN, 0) == -1) {
-        struct sockaddr_in local_addr;
-        int addrlen = sizeof(local_addr);
-        getsockname(socket_fd, (struct sockaddr *) &local_addr, (socklen_t *) &addrlen);
-        printf("[Warning] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
+        fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
     }
 
@@ -142,10 +140,7 @@ int __listening(int socket_fd)
     char send_msg[BUF_MAXLEN] = { 0 };
     sprintf(send_msg, "%s#%d#%s", messages[0].c_str(), stoi(messages[1]), login_username);
     if (send(server_fd, send_msg, strlen(send_msg), 0) == -1) {
-        struct sockaddr_in local_addr;
-        int addrlen = sizeof(local_addr);
-        getsockname(socket_fd, (struct sockaddr *) &local_addr, (socklen_t *) &addrlen);
-        printf("[Warning] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
+        fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
     }
 
