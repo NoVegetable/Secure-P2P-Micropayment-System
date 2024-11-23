@@ -15,7 +15,7 @@ using std::vector;
 using std::string;
 
 extern vector<Peer> peer_list;
-extern char login_username[USERNAME_MAXLEN];
+extern char login_username[USERNAME_MAXLEN + 1];
 extern unsigned int account_balance;
 extern string server_public_key;
 extern unsigned int num_online;
@@ -37,7 +37,7 @@ inline int __get_server_response(int socket_fd, char *send_msg, char *recv_buf)
 
 int __exit_handle(int socket_fd, char *buf)
 {
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
 
     sprintf(send_msg, "Exit");
 
@@ -49,12 +49,12 @@ int __exit_handle(int socket_fd, char *buf)
 int __register_handle(int socket_fd, char *buf)
 {
     char username[USERNAME_MAXLEN + 1] = { 0 };
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
     
     printf("Enter username: ");
     fflush(stdout);
-    fgets(username, sizeof(username), stdin); // fgets() reads at most USER_MAXLEN - 1 characters
-    username[strlen(username) - 1] = 0;
+    fgets(username, sizeof(username), stdin); // fgets() reads at most n - 1 characters
+    username[strlen(username) - 1] = 0; // set newline character to null character
 
     sprintf(send_msg, "REGISTER#%s", username);
 
@@ -93,7 +93,7 @@ int __listening(int socket_fd)
         return INTERNAL_FAILURE;
     }
 
-    char recv_buf[BUF_MAXLEN] = { 0 };
+    char recv_buf[BUF_MAXLEN + 1] = { 0 };
     if (recv(client_fd, recv_buf, BUF_MAXLEN, 0) == -1) {
         fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
@@ -102,7 +102,7 @@ int __listening(int socket_fd)
     vector<string> messages = __split(recv_buf, "#");
     printf("\n[Notification] You have received a payment of $%d from %s.\n", stoi(messages[1]), messages[0].c_str());
 
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
     sprintf(send_msg, "%s#%d#%s", messages[0].c_str(), stoi(messages[1]), login_username);
     if (send(server_fd, send_msg, strlen(send_msg), 0) == -1) {
         fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
@@ -151,7 +151,7 @@ void __parse_list_msg(const char *list_msg)
 int __login_handle(int socket_fd, char *buf)
 {
     char username[USERNAME_MAXLEN + 1] = { 0 };
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
     
     printf("Enter username: ");
     fflush(stdout);
@@ -210,7 +210,7 @@ int __login_handle(int socket_fd, char *buf)
 
 int __list_handle(int socket_fd, char *buf)
 {
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
     
     sprintf(send_msg, "List");
 
@@ -237,7 +237,7 @@ int __transaction_handle(int socket_fd, char *buf)
 {
     char payeename[USERNAME_MAXLEN + 1] = { 0 };
     int payment;
-    char send_msg[BUF_MAXLEN] = { 0 };
+    char send_msg[BUF_MAXLEN + 1] = { 0 };
 
     printf("Enter payeename: ");
     fflush(stdout);

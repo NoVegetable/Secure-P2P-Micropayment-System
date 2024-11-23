@@ -17,7 +17,7 @@ char *server_ip;
 unsigned short server_port;
 int server_fd;
 string server_public_key;
-char login_username[USERNAME_MAXLEN] = { 0 };
+char login_username[USERNAME_MAXLEN + 1] = { 0 };
 unsigned int account_balance;
 unsigned int num_online;
 vector<Peer> peer_list;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
         scanf("%d", &opt);
         getchar();
         
-        char recv_buf[BUF_MAXLEN] = { 0 };
+        char recv_buf[BUF_MAXLEN + 1] = { 0 };
         int retcode = service_handles(opt, server_fd, recv_buf);
 
         if (retcode == -1) {
