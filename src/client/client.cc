@@ -129,7 +129,7 @@ void *__keep_listening(void *socket_fd)
     pthread_exit(0);
 }
 
-void parse_list_msg(const char *list_msg)
+void __parse_list_msg(const char *list_msg)
 {
     vector<string> lines = __split(list_msg, "\n");
     
@@ -199,7 +199,7 @@ int __login_handle(int socket_fd, char *buf)
 
         printf("Keep listening on port %d\n", local_port);
         
-        parse_list_msg(buf); // update peer_list
+        __parse_list_msg(buf); // update peer_list
     }
     else {
         close(local_fd);
@@ -217,7 +217,7 @@ int __list_handle(int socket_fd, char *buf)
     int retcode = __get_server_response(socket_fd, send_msg, buf);
 
     if (retcode != INTERNAL_FAILURE)
-        parse_list_msg(buf); // update peer_list
+        __parse_list_msg(buf); // update peer_list
 
     return retcode;
 }
@@ -252,7 +252,7 @@ int __transaction_handle(int socket_fd, char *buf)
 
     char list_msg[BUF_MAXLEN];
     __list_handle(server_fd, list_msg);
-    parse_list_msg(list_msg);
+    __parse_list_msg(list_msg);
     const Peer *p = __get_peer_by_name(payeename);
     if (p) {
         int peer_fd;
