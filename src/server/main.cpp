@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -9,13 +11,18 @@
 #include <pthread.h>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include "server.h"
 
 using std::string;
 using std::vector;
+using std::unordered_map;
 
 vector<Peer> peer_list;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t peer_list_mutex = PTHREAD_MUTEX_INITIALIZER;
+const char *public_key = "public key";
+unordered_map<string, int> client_fds;
+time_t start, end;
 
 /* XTerm control sequences reference: https://invisible-island.net/xterm/ctlseqs/ctlseqs.html */
 void to_alternate_screen()
@@ -37,12 +44,25 @@ void restore_normal_screen()
     fflush(stdout);
 }
 
+void signal_handler(int sig)
+{
+    if (sig == SIGINT) {
+        end = time(NULL);
+        restore_normal_screen();
+        printf("\n========== Server closed ==========\n");
+        printf("Time elapsed: %ld seconds\n", end - start);
+        exit(0);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "Port number is not given.\n");
+        fprintf(stderr, "[Error] Port number is not given.\n");
         return EXIT_FAILURE;
     }
+
+    signal(SIGINT, signal_handler);
 
     unsigned short port = (unsigned short) atoi(argv[1]);
 
@@ -69,19 +89,30 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    printf("Now listening at port %hu\n", port);
+    to_alternate_screen();
+    printf("\033[H\033[J");
+
+    start = time(NULL);
+
+    printf("[Log] Server starts successfully. Now listening at port %hu\n", port);
 
     while (true) {
         struct sockaddr_in client_addr;
-        int addrlen = sizeof(client_addr);
+        int client_addrlen = sizeof(client_addr);
         int client_fd;
-        if ((client_fd = accept(main_fd, (struct sockaddr *) &client_addr, (socklen_t *) &addrlen)) == -1) {
+        if ((client_fd = accept(main_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addrlen)) == -1) {
             close(main_fd);
             fprintf(stderr, "[Error] Failed to accept a connection");
             return EXIT_FAILURE;
         }
 
-        printf("Accept connection from %s:%hu\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        printf("[Log] Accept connection from %s:%hu\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+        pthread_t tid;
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_create(&tid, &attr, handle_client, &client_fd);
+        pthread_detach(tid);
     }
 
     return 0;
