@@ -254,7 +254,13 @@ int __transaction_handle(int socket_fd, char *buf)
     __list_handle(server_fd, list_msg);
     __parse_list_msg(list_msg);
     const Peer *p = __get_peer_by_name(payeename);
-    if (p) {
+    if (!p) {
+        printf("Payee not found. Transaction is aborted.\n");
+    }
+    else if (account_balance < payment) {
+        printf("No enough balance. Transaction is aborted.\n");
+    }
+    else {
         int peer_fd;
         if ((peer_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
             fprintf(stderr, "[Error] Failed to create socket.\n");
@@ -281,9 +287,6 @@ int __transaction_handle(int socket_fd, char *buf)
             fprintf(stderr, "[Error] Failed to receive messages from the server.\n");
             return INTERNAL_FAILURE;
         }
-    }
-    else {
-        printf("Payee not found. Try updating the online information list.\n");
     }
 
     return 0;
