@@ -16,6 +16,7 @@ STYLE_RESET=\033[0m
 .PHONY: all clean
 
 all: client server
+	@:
 
 client: src/client/*.cpp src/client/*.cc
 	@echo -n -e '${STYLE_COLOR_GREEN}Building client ...'
