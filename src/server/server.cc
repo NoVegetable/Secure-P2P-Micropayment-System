@@ -314,7 +314,12 @@ void *handle_client(void *socket_fd)
         }
         recv_buf[recv_bytes] = 0;
 
-        printf("[Log] Message from %s:%hu (%s): %s\n", client_ip, client_port, username, recv_buf);
+        if (strlen(username) > 0) {
+            printf("[Log] Message from %s:%hu (%s): %s\n", client_ip, client_port, username, recv_buf);
+        }
+        else {
+            printf("[Log] Message from %s:%hu: %s\n", client_ip, client_port, recv_buf);
+        }
 
         ClientMessage message;
         if (__parse_message(&message, recv_buf) == INTERNAL_FAILURE) {
