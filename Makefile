@@ -2,8 +2,8 @@ CC=g++
 
 CSTD=-std=c++17
 
-CLIENT_CFLAGS=-I ./src/client
-SERVER_CFLAGS=-I ./src/server
+CLIENT_CFLAGS=
+SERVER_CFLAGS=
 
 CODEGEN_OPT=-O3
 
