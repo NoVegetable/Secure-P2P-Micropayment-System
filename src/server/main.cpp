@@ -38,9 +38,8 @@ void to_alternate_screen()
 
 void restore_normal_screen()
 {
-    /* CSI ?47l: Use Normal Screen Buffer, xterm. */
-    /* CSI ?1048l: Restore cursor as in DECRC, xterm. */
-    printf("\033[?47l\033[?1048l");
+    /* CSI ?1049l: Use Normal Screen Buffer and restore cursor as in DECRC, xterm.*/
+    printf("\033[?1049l");
     fflush(stdout);
 }
 
