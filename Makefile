@@ -2,13 +2,13 @@ CC=g++
 
 CSTD=-std=c++17
 
-CLIENT_CFLAGS=
-SERVER_CFLAGS=
+INCLUDE=-I./include
 
-CODEGEN_OPT=-O3
+CC_OPT=-Wno-deprecated-declarations -O3
 
-CLIENT_CFLAGS += $(CODEGEN_OPT)
-SERVER_CFLAGS += $(CODEGEN_OPT)
+LD_FLAGS=-lssl -lcrypto
+
+CFLAGS= $(CC_OPT) $(LD_FLAGS)
 
 STYLE_COLOR_GREEN=\033[0;32m
 STYLE_RESET=\033[0m
@@ -18,14 +18,14 @@ STYLE_RESET=\033[0m
 all: client server
 	@:
 
-client: src/client/*.cpp src/client/*.cc
+client: include/client.h src/client/*.cpp src/client/*.cc
 	@echo -n -e '${STYLE_COLOR_GREEN}Building client ...'
-	@$(CC) $(CSTD) $(CLIENT_CFALGS) -o $@ $^
+	@$(CC) $(CSTD) $(INCLUDE) -o client src/client/main.cpp src/client/client.cc $(CFALGS)
 	@echo -e ' done${STYLE_RESET}'
 
-server: src/server/*.cpp src/server/*.cc
+server: include/server.h src/server/*.cpp src/server/*.cc
 	@echo -n -e '${STYLE_COLOR_GREEN}Building server ...'
-	@$(CC) $(CSTD) $(SERVER_CFLAGS) -o $@ $^
+	@$(CC) $(CSTD) $(INCLUDE) -o server src/server/main.cpp src/server/server.cc $(CFLAGS)
 	@echo -e ' done${STYLE_RESET}'
 	
 clean:
