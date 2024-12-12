@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include "server.h"
+#include "crypto.h"
 
 using std::vector;
 using std::string;
@@ -26,7 +27,8 @@ using std::unordered_map;
 
 extern vector<Peer> peer_list;
 extern pthread_mutex_t peer_list_mutex;
-extern const char *public_key;
+extern string public_key;
+extern string private_key;
 extern unordered_map<string, int> client_fds;
 
 const char *exit_pattern = "^Exit$";
@@ -39,6 +41,8 @@ regex_t register_reg;
 regex_t login_reg;
 regex_t list_reg;
 regex_t transaction_reg;
+
+RSA *keypair;
 
 struct ClientMessage {
     int type;
@@ -159,7 +163,8 @@ void __wrap_list_message(char *buf, const char *username)
 {
     Peer *peer = __get_peer(username);
     int online_num = get_online_num();
-    sprintf(buf, "%u\n%s\n%d\n", peer->balance, public_key, online_num);
+    // sprintf(buf, "%u\n%s\n%d\n", peer->balance, public_key.c_str(), online_num);
+    sprintf(buf, "%u\n%d\n", peer->balance, online_num);
 
     for (int i = 0; i < peer_list.size(); ++i) {
         if (peer_list[i].online)
@@ -177,7 +182,7 @@ int __message_handle(int client_fd, ClientMessage *message, char *username)
                 update_peer_list(username, 0, 0, 0, PEER_EXIT);
             }
             sprintf(send_buf, "Bye\n");
-            if (send(client_fd, send_buf, strlen(send_buf), 0) == -1) {
+            if (send_secure(client_fd, send_buf, private_key.c_str(), PRIVATE_ENCRYPT) == -1) {
                 fprintf(stderr, "[Error] Failed to send message to the client.\n");
                 return INTERNAL_FAILURE;
             }
@@ -198,7 +203,7 @@ int __message_handle(int client_fd, ClientMessage *message, char *username)
                 sprintf(send_buf, "210 FAIL\n");
             }
 
-            if (send(client_fd, send_buf, strlen(send_buf), 0) == -1) {
+            if (send_secure(client_fd, send_buf, private_key.c_str(), PRIVATE_ENCRYPT) == -1) {
                 fprintf(stderr, "[Error] Failed to send message to the client.\n");
                 return INTERNAL_FAILURE;
             }
@@ -225,7 +230,7 @@ int __message_handle(int client_fd, ClientMessage *message, char *username)
                 sprintf(send_buf, "220 AUTH_FAIL\n");
             }
 
-            if (send(client_fd, send_buf, strlen(send_buf), 0) == -1) {
+            if (send_secure(client_fd, send_buf, private_key.c_str(), PRIVATE_ENCRYPT) == -1) {
                 fprintf(stderr, "[Error] Failed to send message to the client.\n");
                 return INTERNAL_FAILURE;
             }
@@ -240,7 +245,7 @@ int __message_handle(int client_fd, ClientMessage *message, char *username)
                 sprintf(send_buf, "Please login first.\n");
             }
 
-            if (send(client_fd, send_buf, strlen(send_buf), 0) == -1) {
+            if (send_secure(client_fd, send_buf, private_key.c_str(), PRIVATE_ENCRYPT) == -1) {
                 fprintf(stderr, "[Error] Failed to send message to the client.\n");
                 return INTERNAL_FAILURE;
             }
@@ -270,7 +275,7 @@ int __message_handle(int client_fd, ClientMessage *message, char *username)
                 }
 
                 int payer_fd = client_fds[payername];
-                if (send(payer_fd, send_buf, strlen(send_buf), 0) == -1) {
+                if (send_secure(payer_fd, send_buf, private_key.c_str(), PRIVATE_ENCRYPT) == -1) {
                     fprintf(stderr, "[Error] Failed to send message to the payer.\n");
                     return INTERNAL_FAILURE;
                 }
@@ -307,7 +312,7 @@ void *handle_client(void *socket_fd)
 
     while (true) {
         int recv_bytes = 0;
-        if ((recv_bytes = recv(client_fd, recv_buf, BUF_MAXLEN, 0)) == -1) {
+        if ((recv_bytes = recv_secure(client_fd, recv_buf, BUF_MAXLEN, private_key.c_str(), PRIVATE_DECRYPT)) == -1) {
             fprintf(stderr, "[Error] Failed to receive message from client.\n");
             close(client_fd);
             pthread_exit(0);

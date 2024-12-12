@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include "server.h"
+#include "crypto.h"
 
 using std::string;
 using std::vector;
@@ -20,7 +21,8 @@ using std::unordered_map;
 
 vector<Peer> peer_list;
 pthread_mutex_t peer_list_mutex = PTHREAD_MUTEX_INITIALIZER;
-const char *public_key = "public key";
+string public_key;
+string private_key;
 unordered_map<string, int> client_fds;
 time_t start, end;
 
@@ -63,6 +65,16 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, signal_handler);
 
+    RSA *rsa = generate_rsa_key();
+    char *public_key_, *private_key_;
+    read_rsa_publickey(rsa, &public_key_);
+    read_rsa_privatekey(rsa, &private_key_);
+    public_key = public_key_;
+    private_key = private_key_;
+    RSA_free(rsa);
+    free(public_key_);
+    free(private_key_);
+
     unsigned short port = (unsigned short) atoi(argv[1]);
 
     int main_fd;
@@ -70,6 +82,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "[Error] Failed to create socket.\n");
         return EXIT_FAILURE;
     }
+
+    const int enable = 1;
+    setsockopt(main_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
 
     struct sockaddr_in main_addr;
     main_addr.sin_family = AF_INET;
@@ -106,6 +121,14 @@ int main(int argc, char *argv[])
         }
 
         printf("[Log] Accept connection from %s:%hu\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        
+        printf("[Log] Sending public key to the client ...");
+        fflush(stdout);
+        if (send(client_fd, public_key.c_str(), public_key.size(), 0) == -1) {
+            fprintf(stderr, "[Error] Failed to send public key to the client.\n");
+            return EXIT_FAILURE;
+        }
+        printf(" Done.\n");
 
         pthread_t tid;
         pthread_attr_t attr;

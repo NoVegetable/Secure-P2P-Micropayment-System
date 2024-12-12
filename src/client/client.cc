@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "client.h"
+#include "crypto.h"
 
 using std::vector;
 using std::string;
@@ -17,17 +18,19 @@ using std::string;
 extern vector<Peer> peer_list;
 extern char login_username[USERNAME_MAXLEN + 1];
 extern unsigned int account_balance;
+extern string public_key;
+extern string private_key;
 extern string server_public_key;
 extern unsigned int num_online;
 extern int server_fd;
 
 inline int __get_server_response(int socket_fd, char *send_msg, char *recv_buf)
 {
-    if (send(socket_fd, send_msg, strlen(send_msg), 0) == -1) {
+    if (send_secure(socket_fd, send_msg, server_public_key.c_str(), PUBLIC_ENCRYPT) == -1) {
         fprintf(stderr, "[Error] Failed to send message to server.\n");
         return INTERNAL_FAILURE;
     }
-    if (recv(socket_fd, recv_buf, BUF_MAXLEN, 0) == -1) {
+    if (recv_secure(socket_fd, recv_buf, BUF_MAXLEN, server_public_key.c_str(), PUBLIC_DECRYPT) == -1) {
         fprintf(stderr, "[Error] Failed to receive message from server.\n");
         return INTERNAL_FAILURE;
     }
@@ -93,8 +96,13 @@ int __listening(int socket_fd)
         return INTERNAL_FAILURE;
     }
 
+    if (send(client_fd, public_key.c_str(), public_key.size(), 0) == -1) {
+        fprintf(stderr, "[Error] Failed to send the public key to the client.\n");
+        return INTERNAL_FAILURE;
+    }
+
     char recv_buf[BUF_MAXLEN + 1] = { 0 };
-    if (recv(client_fd, recv_buf, BUF_MAXLEN, 0) == -1) {
+    if (recv_secure(client_fd, recv_buf, BUF_MAXLEN, private_key.c_str(), PRIVATE_DECRYPT) == -1) {
         fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
     }
@@ -104,7 +112,7 @@ int __listening(int socket_fd)
 
     char send_msg[BUF_MAXLEN + 1] = { 0 };
     sprintf(send_msg, "%s#%d#%s", messages[0].c_str(), stoi(messages[1]), login_username);
-    if (send(server_fd, send_msg, strlen(send_msg), 0) == -1) {
+    if (send_secure(server_fd, send_msg, server_public_key.c_str(), PUBLIC_ENCRYPT) == -1) {
         fprintf(stderr, "[Error] Your server on port %d just crashed.\n", ntohs(local_addr.sin_port));
         return INTERNAL_FAILURE;
     }
@@ -134,11 +142,12 @@ void __parse_list_msg(const char *list_msg)
     vector<string> lines = __split(list_msg, "\n");
     
     account_balance = (unsigned int) stoi(lines[0]);
-    server_public_key = std::move(lines[1]);
-    num_online = (unsigned int) stoi(lines[2]);
+    // server_public_key = std::move(lines[1]);
+    // num_online = (unsigned int) stoi(lines[2]);
+    num_online = (unsigned int) stoi(lines[1]);
     
     peer_list.clear();
-    for (int i = 3; i < 3 + num_online; ++i) {
+    for (int i = 2; i < 2 + num_online; ++i) {
         vector<string> user = __split(lines[i].c_str(), "#\n");
         Peer peer;
         strcpy(peer.name, user[0].c_str());
@@ -276,14 +285,20 @@ int __transaction_handle(int socket_fd, char *buf)
             return INTERNAL_FAILURE;
         }
 
-        if (send(peer_fd, send_msg, strlen(send_msg), 0) == -1) {
+        char peer_public_key[2048] = { 0 };
+        if (recv(peer_fd, peer_public_key, BUF_MAXLEN, 0) == -1) {
+            fprintf(stderr, "[Error] Failed to acquire the public key from peer.\n");
+            return INTERNAL_FAILURE;
+        }
+
+        if (send_secure(peer_fd, send_msg, peer_public_key, PUBLIC_ENCRYPT) == -1) {
             fprintf(stderr, "[Error] Failed to send message to payee.\n");
             return INTERNAL_FAILURE;
         }
 
         close(peer_fd);
  
-        if (recv(server_fd, buf, BUF_MAXLEN, 0) == -1) {
+        if (recv_secure(server_fd, buf, BUF_MAXLEN, server_public_key.c_str(), PUBLIC_DECRYPT) == -1) {
             fprintf(stderr, "[Error] Failed to receive messages from the server.\n");
             return INTERNAL_FAILURE;
         }
@@ -305,7 +320,7 @@ int service_handles(int opt, int socket_fd, char *buf)
             break;
         }
         case SERVICE_LOGIN:
-        {
+        {    
             return __login_handle(socket_fd, buf);
             break;
         }

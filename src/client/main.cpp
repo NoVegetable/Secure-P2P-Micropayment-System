@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include "client.h"
+#include "crypto.h"
 
 using std::string;
 using std::vector;
@@ -16,6 +17,8 @@ using std::vector;
 char *server_ip;
 unsigned short server_port;
 int server_fd;
+string public_key;
+string private_key;
 string server_public_key;
 char login_username[USERNAME_MAXLEN + 1] = { 0 };
 unsigned int account_balance;
@@ -47,6 +50,16 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    RSA *rsa = generate_rsa_key();
+    char *public_key_, *private_key_;
+    read_rsa_publickey(rsa, &public_key_);
+    read_rsa_privatekey(rsa, &private_key_);
+    public_key = public_key_;
+    private_key = private_key_;
+    RSA_free(rsa);
+    free(public_key_);
+    free(private_key_);
+
     server_ip = argv[1];
     server_port = (unsigned short) atoi(argv[2]);
 
@@ -65,7 +78,16 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Connect to server at %s:%d\n", server_ip, server_port);
-
+    printf("Acquire server public key ...");
+    fflush(stdout);
+    char server_public_key_buf[2048] = { 0 };
+    if (recv(server_fd, server_public_key_buf, sizeof(server_public_key_buf), 0) == -1) {
+        fprintf(stderr, "[Error] Failed to acquried the public key from server.\n");
+        return EXIT_FAILURE;
+    }
+    server_public_key = server_public_key_buf; 
+    printf(" Done\n");
+    
     int opt = -1;
     do {
         printf("\n\033[1mPress ENTER to continue...\033[0m");

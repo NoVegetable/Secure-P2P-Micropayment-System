@@ -4,11 +4,9 @@ CSTD=-std=c++17
 
 INCLUDE=-I./include
 
-CC_OPT=-Wno-deprecated-declarations -O3
+CC_OPT=-Wno-deprecated-declarations
 
 LD_FLAGS=-lssl -lcrypto
-
-CFLAGS= $(CC_OPT) $(LD_FLAGS)
 
 STYLE_COLOR_GREEN=\033[0;32m
 STYLE_RESET=\033[0m
@@ -18,14 +16,14 @@ STYLE_RESET=\033[0m
 all: client server
 	@:
 
-client: include/client.h src/client/*.cpp src/client/*.cc
+client: include/client.h include/crypto.h src/client/* src/crypto.cc
 	@echo -n -e '${STYLE_COLOR_GREEN}Building client ...'
-	@$(CC) $(CSTD) $(INCLUDE) -o client src/client/main.cpp src/client/client.cc $(CFALGS)
+	@$(CC) $(CSTD) $(CC_OPT) $(INCLUDE) -o client src/client/* src/crypto.cc $(LD_FLAGS)
 	@echo -e ' done${STYLE_RESET}'
 
-server: include/server.h src/server/*.cpp src/server/*.cc
+server: include/server.h include/crypto.h src/server/* src/crypto.cc
 	@echo -n -e '${STYLE_COLOR_GREEN}Building server ...'
-	@$(CC) $(CSTD) $(INCLUDE) -o server src/server/main.cpp src/server/server.cc $(CFLAGS)
+	@$(CC) $(CSTD) $(CC_OPT) $(INCLUDE) -o server src/server/* src/crypto.cc $(LD_FLAGS)
 	@echo -e ' done${STYLE_RESET}'
 	
 clean:
