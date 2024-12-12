@@ -17,14 +17,14 @@ all: client server
 	@:
 
 client: include/client.h include/crypto.h src/client/* src/crypto.cc
-	@echo -n -e '${STYLE_COLOR_GREEN}Building client ...'
+	@echo -n -e '${STYLE_COLOR_GREEN}Building client ...${STYLE_RESET}'
 	@$(CC) $(CSTD) $(CC_OPT) $(INCLUDE) -o client src/client/* src/crypto.cc $(LD_FLAGS)
-	@echo -e ' done${STYLE_RESET}'
+	@echo -e '${STYLE_COLOR_GREEN} done${STYLE_RESET}'
 
 server: include/server.h include/crypto.h src/server/* src/crypto.cc
-	@echo -n -e '${STYLE_COLOR_GREEN}Building server ...'
+	@echo -n -e '${STYLE_COLOR_GREEN}Building server ...${STYLE_RESET}'
 	@$(CC) $(CSTD) $(CC_OPT) $(INCLUDE) -o server src/server/* src/crypto.cc $(LD_FLAGS)
-	@echo -e ' done${STYLE_RESET}'
+	@echo -e '${STYLE_COLOR_GREEN} done${STYLE_RESET}'
 	
 clean:
 	@-rm -rf client
