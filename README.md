@@ -63,4 +63,4 @@ This will delete both `client` and `server`.
    - `host`: The host that server is running on.
    - `port`: The port to which the server binds.
    
-   Note that you can run multiple clients simultaneously.
+   Note that it is possible to run multiple clients simultaneously.

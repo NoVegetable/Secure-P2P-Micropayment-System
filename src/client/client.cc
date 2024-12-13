@@ -336,8 +336,8 @@ int service_handles(int opt, int socket_fd, char *buf)
         }
         default:
         {
-            fprintf(stderr, "Command not found.\n");
-            return INTERNAL_FAILURE;
+            printf("Command not found.\n");
+            return 0;
         }
     }
 }
