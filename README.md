@@ -5,8 +5,8 @@ This is a P2P (person-to-person) micropayment system that supports secure messag
 - [Secure P2P Micropayment System](#secure-p2p-micropayment-system)
   - [Overview](#overview)
   - [Environment](#environment)
-  - [Building](#building)
-  - [Running](#running)
+  - [How to Build](#how-to-build)
+  - [How to Run](#how-to-run)
 
 ## Environment
 
@@ -14,7 +14,7 @@ This is a P2P (person-to-person) micropayment system that supports secure messag
 - gcc 13.2.0
 - GNU Make 4.3
 
-## Building
+## How to Build
 
 There are several ways to build the programs:
 
@@ -48,7 +48,7 @@ make clean
 ```
 This will delete both `client` and `server`.
 
-## Running
+## How to Run
 
 1. Run the server side:
    ```bash
