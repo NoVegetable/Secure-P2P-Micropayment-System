@@ -1,22 +1,22 @@
 # Secure P2P Micropayment System
-This is a P2P (person-to-person) micropayment system that supports secure message transfer.
+This is a P2P (person-to-person) micropayment system that supports secure message transmission.
 
 ## Overview
 - [Secure P2P Micropayment System](#secure-p2p-micropayment-system)
   - [Overview](#overview)
-  - [Prerequisites](#prerequisites)
+  - [Environment](#environment)
   - [Building](#building)
   - [Running](#running)
 
-## Prerequisites
+## Environment
 
-- Linux
-- gcc 13.2.0+
-- Make 4.3+
+- Ubuntu 24.04 LTS
+- gcc 13.2.0
+- GNU Make 4.3
 
 ## Building
 
-There are several ways to build programs:
+There are several ways to build the programs:
 
 - Build all the programs:
   ```bash
@@ -24,11 +24,11 @@ There are several ways to build programs:
   ```
   This will generate two programs: `client` and `server`, under the current directory.
 
-- Or build with multiple processors:
+- Or accelerate the building phase with multiple cores:
   ```bash
   make -j$(nproc)
   ```
-  *Warning: build with this method may mess up the output log.*
+  *Warning: build with this method may mess up the output messages from builing.*
 
 - Only build the client program:
   ```bash
@@ -60,7 +60,7 @@ This will delete both `client` and `server`.
    ```bash
    ./client <host> <port>
    ``` 
-   - `host`: The host that server is running on.
+   - `host`: The host that server is running on. If the server is run locally, type `127.0.0.1`.
    - `port`: The port to which the server binds.
    
    Note that it is possible to run multiple clients simultaneously.
