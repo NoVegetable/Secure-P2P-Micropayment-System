@@ -87,7 +87,9 @@ int main(int argc, char *argv[]) {
     }
     server_public_key = server_public_key_buf; 
     printf(" Done\n");
-    
+    printf("Server public key:\n");
+    printf("%s", server_public_key.c_str());
+
     int opt = -1;
     do {
         printf("\n\033[1mPress ENTER to continue...\033[0m");
